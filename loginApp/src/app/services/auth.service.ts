@@ -1,6 +1,6 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { UsuarioModel } from '../models/usuario.modelo';
+import { HttpClient } from '@angular/common/http';
+import { UsuarioModel } from '../models/usuario.model';
 
 import { map } from 'rxjs/operators';
 
@@ -9,29 +9,29 @@ import { map } from 'rxjs/operators';
 })
 export class AuthService {
 
-  private url = 'https://identitytoolkit.googleapis.com/v1/accounts:';
+  private url = 'https://www.googleapis.com/identitytoolkit/v3/relyingparty';
   private apikey = 'AIzaSyDNnSFX4FiKtVGpN_1kFiCQc3H7YQmlxs0';
 
   userToken: any;
 
-
-  // CREAR NUEVOS USUARIOS
-  // https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=[API_KEY]
+  // Crear nuevo usuario
+  // https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=[API_KEY]
 
 
   // Login
-  // https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=[API_KEY]
+  // https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=[API_KEY]
 
 
-  constructor( private http:HttpClient ) { 
+  constructor( private http: HttpClient ) {
     this.leerToken();
   }
 
-  logout() { 
+
+  logout() {
     localStorage.removeItem('token');
   }
 
-  login( usuario: UsuarioModel ) { 
+  login( usuario: UsuarioModel ) {
 
     const authData = {
       ...usuario,
@@ -39,7 +39,7 @@ export class AuthService {
     };
 
     return this.http.post(
-      `${ this.url }signInWithPassword?key=${ this.apikey }`,
+      `${ this.url }/verifyPassword?key=${ this.apikey }`,
       authData
     ).pipe(
       map( resp => {
@@ -58,7 +58,7 @@ export class AuthService {
     };
 
     return this.http.post(
-      `${ this.url }signUp?key=${ this.apikey }`,
+      `${ this.url }/signupNewUser?key=${ this.apikey }`,
       authData
     ).pipe(
       map( resp => {
@@ -70,27 +70,50 @@ export class AuthService {
   }
 
 
-  private guardarToken( idToken: string){
+  private guardarToken( idToken: string ) {
 
     this.userToken = idToken;
-    localStorage.setItem('token',idToken);
+    localStorage.setItem('token', idToken);
+
+    let hoy = new Date();
+    hoy.setSeconds( 3600 );
+
+    localStorage.setItem('expira', hoy.getTime().toString() );
+
 
   }
 
   leerToken() {
+
     if ( localStorage.getItem('token') ) {
       this.userToken = localStorage.getItem('token');
     } else {
       this.userToken = '';
     }
 
-    return this.userToken; 
+    return this.userToken;
+
   }
 
-  estaAutenticado() : Boolean {
-    return this.userToken.length > 2;
-  }
 
+  estaAutenticado(): boolean {
+
+    if ( this.userToken.length < 2 ) {
+      return false;
+    }
+
+    const expira = Number(localStorage.getItem('expira'));
+    const expiraDate = new Date();
+    expiraDate.setTime(expira);
+
+    if ( expiraDate > new Date() ) {
+      return true;
+    } else {
+      return false;
+    }
+
+
+  }
 
 
 }

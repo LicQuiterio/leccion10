@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
+import { NgForm } from '@angular/forms';
 
-import { UsuarioModel } from 'src/app/models/usuario.modelo';
-import { AuthService } from 'src/app/services/auth.service';
+import { UsuarioModel } from '../../models/usuario.model';
+import { AuthService } from '../../services/auth.service';
 
 import Swal from 'sweetalert2';
 
@@ -14,26 +14,25 @@ import Swal from 'sweetalert2';
 })
 export class LoginComponent implements OnInit {
 
-
-  usuario : UsuarioModel = new UsuarioModel();
+  usuario: UsuarioModel = new UsuarioModel();
   recordarme = false;
-  
+
   constructor( private auth: AuthService,
                private router: Router ) { }
 
   ngOnInit() {
 
     if ( localStorage.getItem('email') ) {
-       this.usuario.email = localStorage.getItem('email');
-       this.recordarme = true;
+      this.usuario.email = localStorage.getItem('email');
+      this.recordarme = true;
     }
 
   }
 
 
-  login( form: NgForm ){
+  login( form: NgForm ) {
 
-    if ( form.invalid ) { return; }
+    if (  form.invalid ) { return; }
 
     Swal.fire({
       allowOutsideClick: false,
@@ -64,9 +63,7 @@ export class LoginComponent implements OnInit {
           title: 'Error al autenticar',
           text: err.error.error.message
         });
-
       });
-
 
   }
 
